@@ -4,10 +4,16 @@ session_start();
 ?>
 <!DOCTYPE html>
 <html>
-<head>
+<header>
 	<title>FaceSpace</title>
 	<link rel="stylesheet" href="./styler.css">
-</head>
+	<style type="text/css">
+		header {
+			background-color: #3B5998;
+    		height: 150px;
+    	}
+    </style>
+</header>
 
 <body>
 <?php
@@ -15,16 +21,17 @@ include("config.php");
 $icon=$_SESSION['Icon'];
 $background=$_SESSION["Background"];
 $username = $_SESSION['Username'];
+$logged=$_SESSION['LoggedIn'];
 ?>
 <div class="pagewrap" style="background-image: url('<?php echo $background;?>')">
 	<div id="navbar">
 		<div id="profilepic">
-			<a href="edit_profile.html">Edit Profile</a>
-			<a href='home.html'>LOGOUT</a>
+			<a href="edit_profile.html" style="color:white;">Edit Profile</a>
+			<a href='logout.php' style="color:white;">LOGOUT</a>
 			
 		
 		<?php
-		
+		print($logged);
 		print("<h1>Hello ". $username." </h1>");
 		//print("<h4>Your icon is: </h4>");
 		//print($_SESSION['Icon']);
@@ -32,7 +39,8 @@ $username = $_SESSION['Username'];
 		//print($_SESSION['Background']);
 		print ("<img id='icon' src='".$icon."'>");
 		$sql = "SELECT * FROM project3 WHERE Username !='$username'";
-		$sqlMe = "SELECT * FROM project3 WHERE Username ='$username'"; 
+		$sqlMe = "SELECT * FROM project3 WHERE Username ='$username'";
+		$sqlWall = "SELECT * FROM wallposts WHERE Username ='$username'";  
  
 	
 		$result = mysql_query($sql);
@@ -40,6 +48,11 @@ $username = $_SESSION['Username'];
 		if(mysql_num_rows($resultMe)>0){
 			while($rowMe = mysql_fetch_assoc($resultMe)){
 				$status = $rowMe['Status'];
+			}
+		}
+		$resultWall = mysql_query($sqlWall);
+		if(mysql_num_rows($resultWall)>0){
+			while($rowMe = mysql_fetch_assoc($resultWall)){
 				$wall1 = $rowMe['Wall1'];
 				$wall2 = $rowMe['Wall2'];
 				$wall3 = $rowMe['Wall3'];
@@ -52,6 +65,7 @@ $username = $_SESSION['Username'];
 				$wall10 = $rowMe['Wall10'];
 			}
 		}
+
 
 		
 print("<div class='row'>");
@@ -66,21 +80,29 @@ print("<div class='row'>");
 		print("<h2>FRIENDS</h2>");
 		if(mysql_num_rows($result)>0){
 			$i=0;
+			print('<div id="frdiv">');
 			while($row = mysql_fetch_assoc($result)){
 				$friends = $row["Username"];
-				print("<div id='friends'><a href='friend_home.php?fname=$friends'>$friends</a><br/> </div>");
+				$friendLogged = $row["LoggedIn"];
+				print("<div id='friends'><a href='friend_home.php?fname=$friends'>$friends</a>");
+					if($friendLogged==0){
+						print("<img style='height:20px; width:20px;' id='logicon' src='./offline.png'><br/> </div>");
+					}else{
+						print("<img style='height:20px; width:20px;' id='logicon' src='./online.png'><br/> </div>");
+					}
 				$ficon =$row["Icon"];
 				$fbackground=$row["Background"];
 				//Testing purposes below
 				
 			}
+			print('</div>');
 		}
 	
 	
 		
 	print("</div>");
 	
-	print("<div class='column right'>");	
+	print("<div class='column right wallpost'>");	
 		print('<h4>Your wall posts are: </h4>');
 		//TODO: Add if statement, if(null)=>Do not print
 		print('<br>');
